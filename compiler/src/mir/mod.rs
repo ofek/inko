@@ -224,7 +224,11 @@ impl Block {
         }
     }
 
-    pub(crate) fn goto(&mut self, block: BlockId, location: Location) {
+    pub(crate) fn goto(
+        &mut self,
+        block: BlockId,
+        location: InstructionLocation,
+    ) {
         self.instructions
             .push(Instruction::Goto(Box::new(Goto { block, location })));
     }
@@ -234,7 +238,7 @@ impl Block {
         condition: RegisterId,
         if_true: BlockId,
         if_false: BlockId,
-        location: Location,
+        location: InstructionLocation,
     ) {
         self.instructions.push(Instruction::Branch(Box::new(Branch {
             condition,
@@ -248,7 +252,7 @@ impl Block {
         &mut self,
         register: RegisterId,
         blocks: Vec<BlockId>,
-        location: Location,
+        location: InstructionLocation,
     ) {
         self.instructions.push(Instruction::Switch(Box::new(Switch {
             register,
@@ -260,13 +264,17 @@ impl Block {
     pub(crate) fn return_value(
         &mut self,
         register: RegisterId,
-        location: Location,
+        location: InstructionLocation,
     ) {
         self.instructions
             .push(Instruction::Return(Box::new(Return { register, location })));
     }
 
-    pub(crate) fn finish(&mut self, terminate: bool, location: Location) {
+    pub(crate) fn finish(
+        &mut self,
+        terminate: bool,
+        location: InstructionLocation,
+    ) {
         self.instructions.push(Instruction::Finish(Box::new(Finish {
             location,
             terminate,
@@ -276,7 +284,7 @@ impl Block {
     pub(crate) fn nil_literal(
         &mut self,
         register: RegisterId,
-        location: Location,
+        location: InstructionLocation,
     ) {
         self.instructions.push(Instruction::Nil(Box::new(NilLiteral {
             register,
@@ -288,7 +296,7 @@ impl Block {
         &mut self,
         register: RegisterId,
         value: bool,
-        location: Location,
+        location: InstructionLocation,
     ) {
         self.instructions.push(Instruction::Bool(Box::new(BoolLiteral {
             register,
@@ -301,7 +309,7 @@ impl Block {
         &mut self,
         register: RegisterId,
         value: i64,
-        location: Location,
+        location: InstructionLocation,
     ) {
         self.instructions.push(Instruction::Int(Box::new(IntLiteral {
             register,
@@ -314,7 +322,7 @@ impl Block {
         &mut self,
         register: RegisterId,
         value: f64,
-        location: Location,
+        location: InstructionLocation,
     ) {
         self.instructions.push(Instruction::Float(Box::new(FloatLiteral {
             register,
@@ -327,7 +335,7 @@ impl Block {
         &mut self,
         register: RegisterId,
         value: String,
-        location: Location,
+        location: InstructionLocation,
     ) {
         self.instructions.push(Instruction::String(Box::new(StringLiteral {
             register,
@@ -340,7 +348,7 @@ impl Block {
         &mut self,
         target: RegisterId,
         source: RegisterId,
-        location: Location,
+        location: InstructionLocation,
     ) {
         self.instructions.push(Instruction::MoveRegister(Box::new(
             MoveRegister { source, target, volatile: false, location },
@@ -351,7 +359,7 @@ impl Block {
         &mut self,
         target: RegisterId,
         source: RegisterId,
-        location: Location,
+        location: InstructionLocation,
     ) {
         self.instructions.push(Instruction::MoveRegister(Box::new(
             MoveRegister { source, target, volatile: true, location },
@@ -362,7 +370,7 @@ impl Block {
         &mut self,
         register: RegisterId,
         value: RegisterId,
-        location: Location,
+        location: InstructionLocation,
     ) {
         self.instructions.push(Instruction::Reference(Box::new(Reference {
             register,
@@ -371,7 +379,11 @@ impl Block {
         })));
     }
 
-    pub(crate) fn increment(&mut self, value: RegisterId, location: Location) {
+    pub(crate) fn increment(
+        &mut self,
+        value: RegisterId,
+        location: InstructionLocation,
+    ) {
         self.instructions.push(Instruction::Increment(Box::new(Increment {
             register: value,
             location,
@@ -381,7 +393,7 @@ impl Block {
     pub(crate) fn decrement(
         &mut self,
         register: RegisterId,
-        location: Location,
+        location: InstructionLocation,
     ) {
         self.instructions.push(Instruction::Decrement(Box::new(Decrement {
             register,
@@ -392,7 +404,7 @@ impl Block {
     pub(crate) fn increment_atomic(
         &mut self,
         value: RegisterId,
-        location: Location,
+        location: InstructionLocation,
     ) {
         self.instructions.push(Instruction::IncrementAtomic(Box::new(
             IncrementAtomic { register: value, location },
@@ -404,14 +416,18 @@ impl Block {
         register: RegisterId,
         if_true: BlockId,
         if_false: BlockId,
-        location: Location,
+        location: InstructionLocation,
     ) {
         self.instructions.push(Instruction::DecrementAtomic(Box::new(
             DecrementAtomic { register, if_true, if_false, location },
         )));
     }
 
-    pub(crate) fn drop(&mut self, register: RegisterId, location: Location) {
+    pub(crate) fn drop(
+        &mut self,
+        register: RegisterId,
+        location: InstructionLocation,
+    ) {
         self.instructions.push(Instruction::Drop(Box::new(Drop {
             register,
             dropper: true,
@@ -422,7 +438,7 @@ impl Block {
     pub(crate) fn drop_without_dropper(
         &mut self,
         register: RegisterId,
-        location: Location,
+        location: InstructionLocation,
     ) {
         self.instructions.push(Instruction::Drop(Box::new(Drop {
             register,
@@ -435,7 +451,7 @@ impl Block {
         &mut self,
         register: RegisterId,
         class: types::ClassId,
-        location: Location,
+        location: InstructionLocation,
     ) {
         self.instructions.push(Instruction::Free(Box::new(Free {
             register,
@@ -447,7 +463,7 @@ impl Block {
     pub(crate) fn check_refs(
         &mut self,
         register: RegisterId,
-        location: Location,
+        location: InstructionLocation,
     ) {
         self.instructions.push(Instruction::CheckRefs(Box::new(CheckRefs {
             register,
@@ -461,7 +477,7 @@ impl Block {
         method: types::MethodId,
         arguments: Vec<RegisterId>,
         type_arguments: Option<usize>,
-        location: Location,
+        location: InstructionLocation,
     ) {
         self.instructions.push(Instruction::CallStatic(Box::new(CallStatic {
             register,
@@ -479,7 +495,7 @@ impl Block {
         method: types::MethodId,
         arguments: Vec<RegisterId>,
         type_arguments: Option<usize>,
-        location: Location,
+        location: InstructionLocation,
     ) {
         self.instructions.push(Instruction::CallInstance(Box::new(
             CallInstance {
@@ -498,7 +514,7 @@ impl Block {
         register: RegisterId,
         method: types::MethodId,
         arguments: Vec<RegisterId>,
-        location: Location,
+        location: InstructionLocation,
     ) {
         self.instructions.push(Instruction::CallExtern(Box::new(CallExtern {
             register,
@@ -515,7 +531,7 @@ impl Block {
         method: types::MethodId,
         arguments: Vec<RegisterId>,
         type_arguments: Option<usize>,
-        location: Location,
+        location: InstructionLocation,
     ) {
         self.instructions.push(Instruction::CallDynamic(Box::new(
             CallDynamic {
@@ -534,7 +550,7 @@ impl Block {
         register: RegisterId,
         receiver: RegisterId,
         arguments: Vec<RegisterId>,
-        location: Location,
+        location: InstructionLocation,
     ) {
         self.instructions.push(Instruction::CallClosure(Box::new(
             CallClosure { register, receiver, arguments, location },
@@ -545,7 +561,7 @@ impl Block {
         &mut self,
         register: RegisterId,
         receiver: RegisterId,
-        location: Location,
+        location: InstructionLocation,
     ) {
         self.instructions.push(Instruction::CallDropper(Box::new(
             CallDropper { register, receiver, location },
@@ -557,7 +573,7 @@ impl Block {
         register: RegisterId,
         name: Intrinsic,
         arguments: Vec<RegisterId>,
-        location: Location,
+        location: InstructionLocation,
     ) {
         self.instructions.push(Instruction::CallBuiltin(Box::new(
             CallBuiltin { register, name, arguments, location },
@@ -570,7 +586,7 @@ impl Block {
         method: types::MethodId,
         arguments: Vec<RegisterId>,
         type_arguments: Option<usize>,
-        location: Location,
+        location: InstructionLocation,
     ) {
         self.instructions.push(Instruction::Send(Box::new(Send {
             receiver,
@@ -587,7 +603,7 @@ impl Block {
         receiver: RegisterId,
         class: types::ClassId,
         field: types::FieldId,
-        location: Location,
+        location: InstructionLocation,
     ) {
         self.instructions.push(Instruction::GetField(Box::new(GetField {
             class,
@@ -604,7 +620,7 @@ impl Block {
         class: types::ClassId,
         field: types::FieldId,
         value: RegisterId,
-        location: Location,
+        location: InstructionLocation,
     ) {
         self.instructions.push(Instruction::SetField(Box::new(SetField {
             receiver,
@@ -619,7 +635,7 @@ impl Block {
         &mut self,
         register: RegisterId,
         value: RegisterId,
-        location: Location,
+        location: InstructionLocation,
     ) {
         self.instructions.push(Instruction::Pointer(Box::new(Pointer {
             register,
@@ -634,7 +650,7 @@ impl Block {
         receiver: RegisterId,
         class: types::ClassId,
         field: types::FieldId,
-        location: Location,
+        location: InstructionLocation,
     ) {
         self.instructions.push(Instruction::FieldPointer(Box::new(
             FieldPointer { class, register, receiver, field, location },
@@ -645,7 +661,7 @@ impl Block {
         &mut self,
         register: RegisterId,
         method: types::MethodId,
-        location: Location,
+        location: InstructionLocation,
     ) {
         self.instructions.push(Instruction::MethodPointer(Box::new(
             MethodPointer { register, method, location },
@@ -656,7 +672,7 @@ impl Block {
         &mut self,
         register: RegisterId,
         pointer: RegisterId,
-        location: Location,
+        location: InstructionLocation,
     ) {
         self.instructions.push(Instruction::ReadPointer(Box::new(
             ReadPointer { register, pointer, location },
@@ -667,7 +683,7 @@ impl Block {
         &mut self,
         pointer: RegisterId,
         value: RegisterId,
-        location: Location,
+        location: InstructionLocation,
     ) {
         self.instructions.push(Instruction::WritePointer(Box::new(
             WritePointer { pointer, value, location },
@@ -678,7 +694,7 @@ impl Block {
         &mut self,
         register: RegisterId,
         class: types::ClassId,
-        location: Location,
+        location: InstructionLocation,
     ) {
         self.instructions.push(Instruction::Allocate(Box::new(Allocate {
             register,
@@ -691,7 +707,7 @@ impl Block {
         &mut self,
         register: RegisterId,
         class: types::ClassId,
-        location: Location,
+        location: InstructionLocation,
     ) {
         self.instructions.push(Instruction::Spawn(Box::new(Spawn {
             register,
@@ -704,14 +720,14 @@ impl Block {
         &mut self,
         register: RegisterId,
         id: types::ConstantId,
-        location: Location,
+        location: InstructionLocation,
     ) {
         self.instructions.push(Instruction::GetConstant(Box::new(
             GetConstant { register, id, location },
         )));
     }
 
-    pub(crate) fn preempt(&mut self, location: Location) {
+    pub(crate) fn preempt(&mut self, location: InstructionLocation) {
         self.instructions
             .push(Instruction::Preempt(Box::new(Preempt { location })))
     }
@@ -722,7 +738,7 @@ impl Block {
         source: RegisterId,
         from: CastType,
         to: CastType,
-        location: Location,
+        location: InstructionLocation,
     ) {
         self.instructions.push(Instruction::Cast(Box::new(Cast {
             register,
@@ -737,7 +753,7 @@ impl Block {
         &mut self,
         register: RegisterId,
         argument: TypeRef,
-        location: Location,
+        location: InstructionLocation,
     ) {
         self.instructions.push(Instruction::SizeOf(Box::new(SizeOf {
             register,
@@ -749,14 +765,14 @@ impl Block {
     pub(crate) fn push_debug_scope(
         &mut self,
         method: MethodId,
-        location: Location,
+        location: InstructionLocation,
     ) {
         self.instructions.push(Instruction::PushDebugScope(Box::new(
             PushDebugScope { method, location },
         )));
     }
 
-    pub(crate) fn pop_debug_scope(&mut self, location: Location) {
+    pub(crate) fn pop_debug_scope(&mut self, location: InstructionLocation) {
         self.instructions.push(Instruction::PopDebugScope(location));
     }
 }
@@ -844,25 +860,49 @@ impl AddAssign<usize> for RegisterId {
     }
 }
 
+/// The location of an instruction.
+#[derive(Copy, Clone)]
+pub(crate) struct InstructionLocation {
+    /// The source method the instruction originates from.
+    ///
+    /// In case of inlined instructions this won't be the same as the method in
+    /// which the instruction is contained.
+    pub(crate) method: types::MethodId,
+    pub(crate) line: u32,
+    pub(crate) column: u32,
+    pub(crate) inline_call_id: u32,
+}
+
+impl InstructionLocation {
+    fn new(method: types::MethodId, location: Location) -> InstructionLocation {
+        InstructionLocation {
+            method,
+            line: location.line_start,
+            column: location.column_start,
+            inline_call_id: 0,
+        }
+    }
+}
+
 #[derive(Clone)]
 pub(crate) struct Branch {
     pub(crate) condition: RegisterId,
     pub(crate) if_true: BlockId,
     pub(crate) if_false: BlockId,
-    pub(crate) location: Location,
+    pub(crate) location: InstructionLocation,
 }
 
 #[derive(Clone)]
 pub(crate) struct Switch {
     pub(crate) register: RegisterId,
     pub(crate) blocks: Vec<BlockId>,
-    pub(crate) location: Location,
+    pub(crate) location: InstructionLocation,
 }
 
 #[derive(Clone)]
 pub(crate) struct Goto {
     pub(crate) block: BlockId,
-    pub(crate) location: Location,
+    pub(crate) location: InstructionLocation,
 }
 
 #[derive(Clone)]
@@ -876,13 +916,13 @@ pub(crate) struct MoveRegister {
     /// variables, otherwise we may optimize them away such that e.g. loops no
     /// longer work.
     pub(crate) volatile: bool,
-    pub(crate) location: Location,
+    pub(crate) location: InstructionLocation,
 }
 
 #[derive(Clone)]
 pub(crate) struct CheckRefs {
     pub(crate) register: RegisterId,
-    pub(crate) location: Location,
+    pub(crate) location: InstructionLocation,
 }
 
 /// Drops a value according to its type.
@@ -893,46 +933,46 @@ pub(crate) struct CheckRefs {
 pub(crate) struct Drop {
     pub(crate) register: RegisterId,
     pub(crate) dropper: bool,
-    pub(crate) location: Location,
+    pub(crate) location: InstructionLocation,
 }
 
 #[derive(Clone)]
 pub(crate) struct CallDropper {
     pub(crate) register: RegisterId,
     pub(crate) receiver: RegisterId,
-    pub(crate) location: Location,
+    pub(crate) location: InstructionLocation,
 }
 
 #[derive(Clone)]
 pub(crate) struct Free {
     pub(crate) class: types::ClassId,
     pub(crate) register: RegisterId,
-    pub(crate) location: Location,
+    pub(crate) location: InstructionLocation,
 }
 
 #[derive(Clone)]
 pub(crate) struct Reference {
     pub(crate) register: RegisterId,
     pub(crate) value: RegisterId,
-    pub(crate) location: Location,
+    pub(crate) location: InstructionLocation,
 }
 
 #[derive(Clone)]
 pub(crate) struct Increment {
     pub(crate) register: RegisterId,
-    pub(crate) location: Location,
+    pub(crate) location: InstructionLocation,
 }
 
 #[derive(Clone)]
 pub(crate) struct Decrement {
     pub(crate) register: RegisterId,
-    pub(crate) location: Location,
+    pub(crate) location: InstructionLocation,
 }
 
 #[derive(Clone)]
 pub(crate) struct IncrementAtomic {
     pub(crate) register: RegisterId,
-    pub(crate) location: Location,
+    pub(crate) location: InstructionLocation,
 }
 
 #[derive(Clone)]
@@ -940,47 +980,47 @@ pub(crate) struct DecrementAtomic {
     pub(crate) register: RegisterId,
     pub(crate) if_true: BlockId,
     pub(crate) if_false: BlockId,
-    pub(crate) location: Location,
+    pub(crate) location: InstructionLocation,
 }
 
 #[derive(Clone)]
 pub(crate) struct BoolLiteral {
     pub(crate) value: bool,
     pub(crate) register: RegisterId,
-    pub(crate) location: Location,
+    pub(crate) location: InstructionLocation,
 }
 
 #[derive(Clone)]
 pub(crate) struct NilLiteral {
     pub(crate) register: RegisterId,
-    pub(crate) location: Location,
+    pub(crate) location: InstructionLocation,
 }
 
 #[derive(Clone)]
 pub(crate) struct Return {
     pub(crate) register: RegisterId,
-    pub(crate) location: Location,
+    pub(crate) location: InstructionLocation,
 }
 
 #[derive(Clone)]
 pub(crate) struct IntLiteral {
     pub(crate) register: RegisterId,
     pub(crate) value: i64,
-    pub(crate) location: Location,
+    pub(crate) location: InstructionLocation,
 }
 
 #[derive(Clone)]
 pub(crate) struct FloatLiteral {
     pub(crate) register: RegisterId,
     pub(crate) value: f64,
-    pub(crate) location: Location,
+    pub(crate) location: InstructionLocation,
 }
 
 #[derive(Clone)]
 pub(crate) struct StringLiteral {
     pub(crate) register: RegisterId,
     pub(crate) value: String,
-    pub(crate) location: Location,
+    pub(crate) location: InstructionLocation,
 }
 
 #[derive(Clone)]
@@ -989,7 +1029,7 @@ pub(crate) struct CallStatic {
     pub(crate) method: types::MethodId,
     pub(crate) arguments: Vec<RegisterId>,
     pub(crate) type_arguments: Option<usize>,
-    pub(crate) location: Location,
+    pub(crate) location: InstructionLocation,
 }
 
 #[derive(Clone)]
@@ -999,7 +1039,7 @@ pub(crate) struct CallInstance {
     pub(crate) method: types::MethodId,
     pub(crate) arguments: Vec<RegisterId>,
     pub(crate) type_arguments: Option<usize>,
-    pub(crate) location: Location,
+    pub(crate) location: InstructionLocation,
 }
 
 #[derive(Clone)]
@@ -1007,7 +1047,7 @@ pub(crate) struct CallExtern {
     pub(crate) register: RegisterId,
     pub(crate) method: types::MethodId,
     pub(crate) arguments: Vec<RegisterId>,
-    pub(crate) location: Location,
+    pub(crate) location: InstructionLocation,
 }
 
 #[derive(Clone)]
@@ -1017,7 +1057,7 @@ pub(crate) struct CallDynamic {
     pub(crate) method: types::MethodId,
     pub(crate) arguments: Vec<RegisterId>,
     pub(crate) type_arguments: Option<usize>,
-    pub(crate) location: Location,
+    pub(crate) location: InstructionLocation,
 }
 
 #[derive(Clone)]
@@ -1025,7 +1065,7 @@ pub(crate) struct CallClosure {
     pub(crate) register: RegisterId,
     pub(crate) receiver: RegisterId,
     pub(crate) arguments: Vec<RegisterId>,
-    pub(crate) location: Location,
+    pub(crate) location: InstructionLocation,
 }
 
 #[derive(Clone)]
@@ -1033,7 +1073,7 @@ pub(crate) struct CallBuiltin {
     pub(crate) register: RegisterId,
     pub(crate) name: Intrinsic,
     pub(crate) arguments: Vec<RegisterId>,
-    pub(crate) location: Location,
+    pub(crate) location: InstructionLocation,
 }
 
 #[derive(Clone)]
@@ -1042,7 +1082,7 @@ pub(crate) struct Send {
     pub(crate) method: types::MethodId,
     pub(crate) arguments: Vec<RegisterId>,
     pub(crate) type_arguments: Option<usize>,
-    pub(crate) location: Location,
+    pub(crate) location: InstructionLocation,
 }
 
 #[derive(Clone)]
@@ -1051,7 +1091,7 @@ pub(crate) struct GetField {
     pub(crate) register: RegisterId,
     pub(crate) receiver: RegisterId,
     pub(crate) field: types::FieldId,
-    pub(crate) location: Location,
+    pub(crate) location: InstructionLocation,
 }
 
 #[derive(Clone)]
@@ -1060,39 +1100,39 @@ pub(crate) struct SetField {
     pub(crate) receiver: RegisterId,
     pub(crate) value: RegisterId,
     pub(crate) field: types::FieldId,
-    pub(crate) location: Location,
+    pub(crate) location: InstructionLocation,
 }
 
 #[derive(Clone)]
 pub(crate) struct GetConstant {
     pub(crate) register: RegisterId,
     pub(crate) id: types::ConstantId,
-    pub(crate) location: Location,
+    pub(crate) location: InstructionLocation,
 }
 
 #[derive(Clone)]
 pub(crate) struct Allocate {
     pub(crate) register: RegisterId,
     pub(crate) class: types::ClassId,
-    pub(crate) location: Location,
+    pub(crate) location: InstructionLocation,
 }
 
 #[derive(Clone)]
 pub(crate) struct Spawn {
     pub(crate) register: RegisterId,
     pub(crate) class: types::ClassId,
-    pub(crate) location: Location,
+    pub(crate) location: InstructionLocation,
 }
 
 #[derive(Clone)]
 pub(crate) struct Preempt {
-    pub(crate) location: Location,
+    pub(crate) location: InstructionLocation,
 }
 
 #[derive(Clone)]
 pub(crate) struct Finish {
     pub(crate) terminate: bool,
-    pub(crate) location: Location,
+    pub(crate) location: InstructionLocation,
 }
 
 #[derive(Clone)]
@@ -1101,7 +1141,7 @@ pub(crate) struct Cast {
     pub(crate) source: RegisterId,
     pub(crate) from: CastType,
     pub(crate) to: CastType,
-    pub(crate) location: Location,
+    pub(crate) location: InstructionLocation,
 }
 
 #[derive(Clone, Debug, Copy)]
@@ -1152,14 +1192,14 @@ impl CastType {
 pub(crate) struct Pointer {
     pub(crate) register: RegisterId,
     pub(crate) value: RegisterId,
-    pub(crate) location: Location,
+    pub(crate) location: InstructionLocation,
 }
 
 #[derive(Clone, Copy)]
 pub(crate) struct MethodPointer {
     pub(crate) register: RegisterId,
     pub(crate) method: types::MethodId,
-    pub(crate) location: Location,
+    pub(crate) location: InstructionLocation,
 }
 
 #[derive(Clone)]
@@ -1168,34 +1208,34 @@ pub(crate) struct FieldPointer {
     pub(crate) register: RegisterId,
     pub(crate) receiver: RegisterId,
     pub(crate) field: types::FieldId,
-    pub(crate) location: Location,
+    pub(crate) location: InstructionLocation,
 }
 
 #[derive(Clone, Copy)]
 pub(crate) struct ReadPointer {
     pub(crate) register: RegisterId,
     pub(crate) pointer: RegisterId,
-    pub(crate) location: Location,
+    pub(crate) location: InstructionLocation,
 }
 
 #[derive(Clone, Copy)]
 pub(crate) struct WritePointer {
     pub(crate) pointer: RegisterId,
     pub(crate) value: RegisterId,
-    pub(crate) location: Location,
+    pub(crate) location: InstructionLocation,
 }
 
 #[derive(Clone, Copy)]
 pub(crate) struct SizeOf {
     pub(crate) register: RegisterId,
     pub(crate) argument: types::TypeRef,
-    pub(crate) location: Location,
+    pub(crate) location: InstructionLocation,
 }
 
 #[derive(Clone, Copy)]
 pub(crate) struct PushDebugScope {
     pub(crate) method: types::MethodId,
-    pub(crate) location: Location,
+    pub(crate) location: InstructionLocation,
 }
 
 /// A MIR instruction.
@@ -1245,11 +1285,11 @@ pub(crate) enum Instruction {
     MethodPointer(Box<MethodPointer>),
     SizeOf(Box<SizeOf>),
     PushDebugScope(Box<PushDebugScope>),
-    PopDebugScope(Location),
+    PopDebugScope(InstructionLocation),
 }
 
 impl Instruction {
-    pub(crate) fn location(&self) -> Location {
+    pub(crate) fn location(&self) -> InstructionLocation {
         match self {
             Instruction::Branch(ref v) => v.location,
             Instruction::Switch(ref v) => v.location,
@@ -1294,6 +1334,55 @@ impl Instruction {
             Instruction::PushDebugScope(ref v) => v.location,
             Instruction::PopDebugScope(ref v) => *v,
         }
+    }
+
+    pub(crate) fn set_method(&mut self, method: types::MethodId) {
+        let loc = match self {
+            Instruction::Branch(v) => &mut v.location,
+            Instruction::Switch(v) => &mut v.location,
+            Instruction::Bool(v) => &mut v.location,
+            Instruction::Goto(v) => &mut v.location,
+            Instruction::MoveRegister(v) => &mut v.location,
+            Instruction::Return(v) => &mut v.location,
+            Instruction::Nil(v) => &mut v.location,
+            Instruction::Int(v) => &mut v.location,
+            Instruction::Float(v) => &mut v.location,
+            Instruction::String(v) => &mut v.location,
+            Instruction::CallStatic(v) => &mut v.location,
+            Instruction::CallInstance(v) => &mut v.location,
+            Instruction::CallExtern(v) => &mut v.location,
+            Instruction::CallDynamic(v) => &mut v.location,
+            Instruction::CallClosure(v) => &mut v.location,
+            Instruction::CallDropper(v) => &mut v.location,
+            Instruction::CallBuiltin(v) => &mut v.location,
+            Instruction::Send(v) => &mut v.location,
+            Instruction::GetField(v) => &mut v.location,
+            Instruction::SetField(v) => &mut v.location,
+            Instruction::CheckRefs(v) => &mut v.location,
+            Instruction::Drop(v) => &mut v.location,
+            Instruction::Free(v) => &mut v.location,
+            Instruction::Reference(v) => &mut v.location,
+            Instruction::Increment(v) => &mut v.location,
+            Instruction::Decrement(v) => &mut v.location,
+            Instruction::IncrementAtomic(v) => &mut v.location,
+            Instruction::DecrementAtomic(v) => &mut v.location,
+            Instruction::Allocate(v) => &mut v.location,
+            Instruction::Spawn(v) => &mut v.location,
+            Instruction::GetConstant(v) => &mut v.location,
+            Instruction::Preempt(v) => &mut v.location,
+            Instruction::Finish(v) => &mut v.location,
+            Instruction::Cast(v) => &mut v.location,
+            Instruction::Pointer(v) => &mut v.location,
+            Instruction::ReadPointer(v) => &mut v.location,
+            Instruction::WritePointer(v) => &mut v.location,
+            Instruction::FieldPointer(v) => &mut v.location,
+            Instruction::MethodPointer(v) => &mut v.location,
+            Instruction::SizeOf(v) => &mut v.location,
+            Instruction::PushDebugScope(v) => &mut v.location,
+            Instruction::PopDebugScope(v) => v,
+        };
+
+        loc.method = method;
     }
 
     fn format(&self, db: &types::Database) -> String {
@@ -1571,17 +1660,15 @@ pub(crate) struct Method {
     pub(crate) registers: Registers,
     pub(crate) body: Graph,
     pub(crate) arguments: Vec<RegisterId>,
-    pub(crate) location: Location,
 }
 
 impl Method {
-    pub(crate) fn new(id: types::MethodId, location: Location) -> Self {
+    pub(crate) fn new(id: types::MethodId) -> Self {
         Self {
             id,
             body: Graph::new(),
             registers: Registers::new(),
             arguments: Vec::new(),
-            location,
         }
     }
 
@@ -2258,18 +2345,19 @@ mod tests {
 
     #[test]
     fn test_method_remove_unreachable_blocks() {
-        let mut method = Method::new(MethodId(0), Location::default());
+        let mut method = Method::new(MethodId(0));
 
         method.body.add_block(); // BlockId(0)
 
         let b1 = method.body.add_block();
         let b2 = method.body.add_block();
         let b3 = method.body.add_block();
+        let loc = InstructionLocation::new(MethodId(0), Location::default());
 
         method.body.start_id = b3;
-        method.body.block_mut(b3).goto(b2, Location::default());
+        method.body.block_mut(b3).goto(b2, loc);
         method.body.add_edge(b3, b2);
-        method.body.block_mut(b2).goto(b1, Location::default());
+        method.body.block_mut(b2).goto(b1, loc);
         method.body.add_edge(b2, b1);
         method.remove_unreachable_blocks();
 
@@ -2279,13 +2367,14 @@ mod tests {
 
     #[test]
     fn test_method_remove_empty_blocks() {
-        let mut method = Method::new(MethodId(0), Location::default());
+        let mut method = Method::new(MethodId(0));
 
         let b0 = method.body.add_block();
         let b1 = method.body.add_block();
         let b2 = method.body.add_block();
         let b3 = method.body.add_block();
         let b4 = method.body.add_block();
+        let loc = InstructionLocation::new(MethodId(0), Location::default());
 
         //     b0
         //    /  \
@@ -2295,22 +2384,12 @@ mod tests {
         method.body.start_id = b0;
         method.body.add_edge(b0, b1);
         method.body.add_edge(b0, b2);
-        method.body.block_mut(b0).switch(
-            RegisterId(0),
-            vec![b1, b2],
-            Location::default(),
-        );
+        method.body.block_mut(b0).switch(RegisterId(0), vec![b1, b2], loc);
 
         method.body.add_edge(b1, b3);
         method.body.add_edge(b2, b4);
-        method
-            .body
-            .block_mut(b3)
-            .return_value(RegisterId(10), Location::default());
-        method
-            .body
-            .block_mut(b4)
-            .return_value(RegisterId(20), Location::default());
+        method.body.block_mut(b3).return_value(RegisterId(10), loc);
+        method.body.block_mut(b4).return_value(RegisterId(20), loc);
 
         method.remove_empty_blocks();
 

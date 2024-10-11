@@ -1,6 +1,6 @@
 use crate::mir::{
-    BlockId, Goto, Graph, Instruction, Location, Method, Mir, MoveRegister,
-    RegisterId, Registers,
+    BlockId, Goto, Graph, Instruction, InstructionLocation, Method, Mir,
+    MoveRegister, RegisterId, Registers,
 };
 use crate::state::State;
 use std::cmp::min;
@@ -81,7 +81,6 @@ struct Callee {
     registers: Registers,
     body: Graph,
     arguments: Vec<RegisterId>,
-    location: Location,
 }
 
 struct CallSite {
@@ -104,7 +103,7 @@ struct CallSite {
     arguments: Vec<RegisterId>,
 
     /// The source location of the call.
-    location: Location,
+    location: InstructionLocation,
 }
 
 impl CallSite {
@@ -115,7 +114,7 @@ impl CallSite {
         receiver: Option<RegisterId>,
         arguments: &[RegisterId],
         callee: &Method,
-        location: Location,
+        location: InstructionLocation,
     ) -> CallSite {
         let mut caller_args =
             if let Some(rec) = receiver { vec![rec] } else { Vec::new() };
@@ -364,12 +363,9 @@ impl CallSite {
             caller.body.add_edge(after_call, id);
         }
 
-        caller
-            .body
-            .block_mut(self.block)
-            .push_debug_scope(callee.id, callee.location);
+        caller.body.block_mut(self.block).push_debug_scope(callee.id, loc);
 
-        caller.body.block_mut(self.block).goto(inline_start, self.location);
+        caller.body.block_mut(self.block).goto(inline_start, loc);
         caller.body.add_edge(self.block, inline_start);
     }
 }
@@ -629,7 +625,7 @@ struct Call<'a> {
     register: RegisterId,
     receiver: Option<RegisterId>,
     arguments: &'a [RegisterId],
-    location: Location,
+    location: InstructionLocation,
 }
 
 /// A compiler pass that inlines static method calls into their call sites.
@@ -705,7 +701,6 @@ impl<'a, 'b, 'c> InlineMethod<'a, 'b, 'c> {
                         registers: m.registers.clone(),
                         body: m.body.clone(),
                         arguments: m.arguments.clone(),
-                        location: call.location,
                     }
                 };
 
@@ -715,11 +710,7 @@ impl<'a, 'b, 'c> InlineMethod<'a, 'b, 'c> {
                 // Blocks are guaranteed to have a terminator instruction at this
                 // point, meaning a call to inline is never the last instruction in
                 // the block.
-                let call_loc = caller.body.blocks[call.block.0].instructions
-                    [call.instruction]
-                    .location();
-
-                caller.body.block_mut(after).pop_debug_scope(call_loc);
+                caller.body.block_mut(after).pop_debug_scope(call.location);
 
                 let mut after_ins = caller
                     .body

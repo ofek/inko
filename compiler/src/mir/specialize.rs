@@ -1,6 +1,7 @@
 use crate::mir::{
     Block, BlockId, CallDynamic, CallInstance, CastType, Class as MirClass,
-    Drop, Instruction, Location, Method, Mir, Reference, RegisterId, SELF_ID,
+    Drop, Instruction, InstructionLocation, Method, Mir, Reference, RegisterId,
+    SELF_ID,
 };
 use crate::state::State;
 use indexmap::{IndexMap, IndexSet};
@@ -298,6 +299,7 @@ impl<'a, 'b> Specialize<'a, 'b> {
         self.update_self_type(mir);
         self.process_instructions(mir, dynamic_calls);
         self.process_specialized_types(mir, dynamic_calls);
+        self.update_locations(mir);
         self.expand_instructions(mir);
         self.add_methods(mir);
     }
@@ -532,6 +534,16 @@ impl<'a, 'b> Specialize<'a, 'b> {
                     }
                     _ => {}
                 }
+            }
+        }
+    }
+
+    fn update_locations(&mut self, mir: &mut Mir) {
+        let method = mir.methods.get_mut(&self.method).unwrap();
+
+        for block in &mut method.body.blocks {
+            for ins in &mut block.instructions {
+                ins.set_method(self.method);
             }
         }
     }
@@ -1248,7 +1260,7 @@ impl<'a, 'b, 'c> ExpandDrop<'a, 'b, 'c> {
         before_id: BlockId,
         after_id: BlockId,
         value: RegisterId,
-        location: Location,
+        location: InstructionLocation,
     ) {
         self.block_mut(before_id).decrement(value, location);
         self.block_mut(before_id).goto(after_id, location);
@@ -1260,7 +1272,7 @@ impl<'a, 'b, 'c> ExpandDrop<'a, 'b, 'c> {
         before_id: BlockId,
         after_id: BlockId,
         value: RegisterId,
-        location: Location,
+        location: InstructionLocation,
     ) {
         let drop_id = self.add_block();
         let check = self.block_mut(before_id);
@@ -1283,7 +1295,7 @@ impl<'a, 'b, 'c> ExpandDrop<'a, 'b, 'c> {
         after_id: BlockId,
         value: RegisterId,
         dropper: bool,
-        location: Location,
+        location: InstructionLocation,
     ) {
         if dropper {
             self.call_dropper(before_id, value, location);
@@ -1307,7 +1319,7 @@ impl<'a, 'b, 'c> ExpandDrop<'a, 'b, 'c> {
         &mut self,
         block: BlockId,
         value: RegisterId,
-        location: Location,
+        location: InstructionLocation,
     ) {
         let typ = self.method.registers.value_type(value);
         let reg = self.method.registers.alloc(TypeRef::nil());

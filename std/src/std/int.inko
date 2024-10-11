@@ -749,3 +749,12 @@ impl FormatTrait for Int {
     formatter.write(to_string)
   }
 }
+
+# TODO: remove me
+impl Int {
+  fn pub example {
+    let mut int = 1
+
+    while int > 0 { int -= 1 }
+  }
+}

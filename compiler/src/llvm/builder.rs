@@ -740,6 +740,10 @@ impl<'ctx> Builder<'ctx> {
         self.function.get_subprogram().unwrap().as_debug_info_scope()
     }
 
+    pub(crate) fn get_debug_location(&self) -> DILocation<'ctx> {
+        self.inner.get_current_debug_location().unwrap()
+    }
+
     pub(crate) fn set_debug_location(&self, location: DILocation<'ctx>) {
         self.inner.set_current_debug_location(location);
     }
@@ -886,7 +890,6 @@ impl<'ctx> DebugBuilder<'ctx> {
         db: &Database,
         names: &SymbolNames,
         id: MethodId,
-        line: u32,
     ) -> DISubprogram<'ctx> {
         if let Some(&val) = self.functions.get(&id) {
             return val;
@@ -896,7 +899,7 @@ impl<'ctx> DebugBuilder<'ctx> {
             id.name(db),
             &names.methods[&id],
             &id.source_file(db),
-            line,
+            id.location(db).line_start,
             id.is_private(db),
             false,
         );
